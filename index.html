@@ -224,6 +224,55 @@ html.danger-mode body::after{content:"";position:fixed;inset:0;z-index:150;point
 @keyframes ptrSpin{to{transform:rotate(360deg)}}
 #grid{will-change:transform}
 
+/* odznaky */
+.zero.lvl{background-image:linear-gradient(transparent,transparent),var(--zg);-webkit-text-stroke-color:var(--zs);cursor:pointer;transition:transform .2s;background-size:250% 100%,100% 100%}
+.zero.lvl.shine{background-image:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.9) 50%,transparent 62%),var(--zg)}
+.zero.lvl.anim{background-size:250% 100%,300% 300%}
+.zero.lvl.shine,.zero.lvl.anim{animation:zMove 5s ease-in-out infinite}
+@keyframes zMove{0%{background-position:160% 0,0% 50%}50%{background-position:-60% 0,100% 50%}100%{background-position:160% 0,0% 50%}}
+.zero.lvl.glow{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--zglow) 55%,transparent))}
+.zero.tap{animation:zTap .4s cubic-bezier(.2,.9,.3,1.4)}
+.zero.lvl.shine.tap,.zero.lvl.anim.tap{animation:zTap .4s cubic-bezier(.2,.9,.3,1.4),zMove 5s ease-in-out infinite}
+@keyframes zTap{50%{transform:scale(.88)}}
+.bdg{--s:64px;width:var(--s);height:var(--s);flex:none;border-radius:50%;padding:calc(var(--s)*.07);background:var(--bg);background-size:300% 300%;box-shadow:0 6px 18px -6px var(--gl);position:relative}
+.bdg>div{width:100%;height:100%;border-radius:50%;background:var(--paper);display:grid;place-items:center;overflow:hidden;position:relative}
+.bdg b{font-size:calc(var(--s)*.6);font-weight:900;line-height:1;padding-bottom:.08em;background:var(--bg);background-size:300% 300%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:calc(var(--s)*.018) var(--st)}
+.bdg.anim,.bdg.anim b{animation:bgMove 4s linear infinite}
+@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.bdg.shine>div::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.75) 50%,transparent 65%);background-size:250% 100%;animation:sheen 3s ease-in-out infinite}
+@keyframes sheen{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
+.bdg.lock{--bg:linear-gradient(160deg,var(--line),var(--line));--gl:transparent}
+.bdg.lock b{background:none;color:var(--muted);-webkit-text-stroke:0;font-size:calc(var(--s)*.45)}
+.lvl-cur{display:flex;gap:16px;align-items:center;padding:4px 2px 16px;border-bottom:1px solid var(--line)}
+.lvl-cur>div:last-child{flex:1;min-width:0}
+.lvl-k{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700}
+.lvl-cur h3{margin:2px 0;font-size:20px}
+.lvl-cur p{margin:0 0 8px;color:var(--muted);font-size:14px}
+.lvl-cur small{color:var(--muted);font-size:12px}
+.lvl-bar{height:8px;border-radius:9px;background:var(--blush);overflow:hidden;margin-bottom:6px}
+.lvl-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--rose),var(--crimson))}
+.lvl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:14px 8px;padding-top:16px}
+.lvl-it{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.lvl-it>b{font-size:13px;line-height:1.2}
+.lvl-it small{font-size:11px;color:var(--muted)}
+.lvl-it:not(.got)>b{color:var(--muted)}
+dialog.up{max-width:360px;overflow:hidden;text-align:center}
+.up-in{position:relative;padding:28px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.up-rays{position:absolute;left:50%;top:118px;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;pointer-events:none;opacity:.35;
+  background:repeating-conic-gradient(from 0deg,var(--gl) 0 10deg,transparent 10deg 24deg);-webkit-mask:radial-gradient(circle,#000 0,#000 30%,transparent 62%);mask:radial-gradient(circle,#000 0,#000 30%,transparent 62%);animation:rays 14s linear infinite}
+@keyframes rays{to{transform:rotate(360deg)}}
+.up-k{position:relative;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--crimson)}
+.up-badge{position:relative;margin:8px 0 6px}
+dialog.up[open] .up-badge{animation:badgeIn .9s cubic-bezier(.2,1.4,.3,1) both .15s}
+@keyframes badgeIn{0%{transform:scale(0) rotate(-200deg);opacity:0}70%{transform:scale(1.12) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+dialog.up[open] .up-k,dialog.up[open] h2,dialog.up[open] p,dialog.up[open] .btn{animation:upTxt .5s ease-out both}
+dialog.up[open] h2{animation-delay:.55s}dialog.up[open] p{animation-delay:.7s}dialog.up[open] .btn{animation-delay:.85s}
+@keyframes upTxt{from{opacity:0;transform:translateY(10px)}}
+.up-in h2{position:relative;margin:0;font-size:24px}
+.up-in p{position:relative;margin:0 0 10px;color:var(--muted)}
+.up-in .btn{position:relative;justify-content:center;min-width:140px}
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;pointer-events:none;z-index:2147483647}
+
 /* OCR */
 .ocrbar{grid-column:span 6;display:none;align-items:center;gap:12px;background:var(--blush);border-radius:14px;padding:10px 12px;font-size:14px}
 .ocrbar.show{display:flex;animation:pop .3s}
@@ -424,7 +473,7 @@ dialog[autofocus]:focus{outline:none}
     </div>
     <div class="n-mid">
       <span class="ed">2026 - 1</span>
-      <span class="zero">0</span>
+      <span class="zero" id="zeroBadge" role="button" tabindex="0">0</span>
       <div class="n-info">
         <div class="n-sub">Suvenírové bankovky · 0 euro</div>
         <div class="stats">
@@ -579,6 +628,9 @@ dialog[autofocus]:focus{outline:none}
   <div id="loginErr"></div>
   <button class="btn primary" id="lBtn" type="submit">Prihlásiť sa</button>
 </form></div>
+<dialog id="lvlDlg" class="sheet"><div class="dh"><h2>Odznaky</h2><button class="x" onclick="lvlDlg.close()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="db" id="lvlBody"></div></dialog>
+<dialog id="upDlg" class="sheet up"><div class="up-in"><div class="up-rays" id="upRays"></div><span class="up-k">Nový odznak!</span><div id="upBadge" class="up-badge"></div>
+  <h2 id="upName"></h2><p id="upTxt"></p><button class="btn primary" id="upOk">Super!</button></div></dialog>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -698,7 +750,7 @@ function similarByName(q){const nq=norm(q);if(nq.length<3)return[];
 function render(){
   const list=filtered(),q=$('#q').value.trim();
   // štatistiky
-  $('#stTotal').textContent=notes.length;
+  $('#stTotal').textContent=notes.length;updLevel();
   $('#stPieces').textContent=notes.reduce((s,n)=>s+(+n.qty||1),0);
   const cs=[...new Set(notes.map(n=>n.country).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'sk'));
   $('#stCountries').textContent=cs.length;
@@ -1077,6 +1129,7 @@ async function syncNow(){
         if(!has){n[k]=null;continue}const {data:b,error:e2}=await bucket().download(`${r.id}/${k}-${d.fv}.jpg`);n[k]=e2?(l?.[k]||null):await blobToData(b)}}
       delete n.hasFront;delete n.hasBack;await store.put(n);changed=true}
     if(changed)await refreshFromStore();
+    syncedOnce=true;updLevel();
     setSync('ok','Synchronizované · '+new Date().toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){console.error(e);
     if(/JWT|auth|401|403/i.test(e.message||'')&&!(await sb.auth.getSession()).data.session){showLogin('Prihlásenie vypršalo, prihlás sa znova.')}
@@ -1160,6 +1213,59 @@ if(FS_OK){
     if(isOffline())toast('Bez internetu – zobrazujem uložené bankovky');
     seen=new Set();render();ind.classList.remove('spin');busy=false;set(0,true)};
   document.addEventListener('touchend',end);document.addEventListener('touchcancel',end)})();
+
+/* ================== odznaky (úrovne zbierky) ================== */
+const LEVELS=[
+ {n:0,name:'Nováčik',c:['#c3c6cd','#868a93'],s:'#5f636b'},
+ {n:10,name:'Zberateľ',c:['#b9a3c4','#7d6a88'],s:'#54465d'},
+ {n:25,name:'Nadšenec',c:['#cfa0b4','#94687c'],s:'#6a4757'},
+ {n:50,name:'Ružová hviezda',c:['#ff7cc2','#ff1f8e'],s:'#a3005a',g:'#ff4fa8'},
+ {n:100,name:'Zlatý zberateľ',c:['#fff176','#ffc400','#ff9800'],s:'#9a5d00',g:'#ffc400',shine:1},
+ {n:150,name:'Smaragd',c:['#69ffc8','#00d68a','#00a86b'],s:'#006b45',g:'#1dffa0'},
+ {n:200,name:'Zafír',c:['#6ad8ff','#2979ff','#2340d9'],s:'#0b2a8a',g:'#3d8bff'},
+ {n:250,name:'Rubín',c:['#ff7a95','#ff1744','#c4001d'],s:'#7a0012',g:'#ff2b55'},
+ {n:300,name:'Ametyst',c:['#e3a6ff','#a64dff','#6a1bff'],s:'#40109a',g:'#b25bff'},
+ {n:400,name:'Polárna žiara',c:['#3dffb0','#2ad4ff','#a35bff','#3dffb0'],s:'#1d2a7a',g:'#2ad4ff',anim:1},
+ {n:500,name:'Diamant',c:['#ffffff','#9be7ff','#ffc6f2','#c7b8ff','#9be7ff'],s:'#4a5f9a',g:'#9fe0ff',anim:1,shine:1},
+ {n:750,name:'Plameň',c:['#fff176','#ffab00','#ff3d00','#ff0057','#ffab00'],s:'#7a0018',g:'#ff6a00',anim:1},
+ {n:1000,name:'Legenda',c:['#ff2d95','#ffcc00','#2ad4ff','#a35bff','#ff2d95'],s:'#35093a',g:'#ff7ad0',anim:1,shine:1}];
+const lvlOf=c=>{let i=0;LEVELS.forEach((l,k)=>{if(c>=l.n)i=k});return i};
+const lvlGrad=l=>`linear-gradient(160deg,${l.c.join(',')})`;
+const SHEEN='linear-gradient(110deg,transparent 38%,rgba(255,255,255,.9) 50%,transparent 62%)';
+function badgeHTML(i,size,locked){const l=LEVELS[i];
+  if(locked)return `<div class="bdg lock" style="--s:${size}px"><div><b>?</b></div></div>`;
+  return `<div class="bdg ${l.anim?'anim':''} ${l.shine?'shine':''}" style="--s:${size}px;--bg:${lvlGrad(l)};--st:${l.s};--gl:${l.g||'rgba(0,0,0,.25)'}"><div><b>0</b></div></div>`}
+let syncedOnce=false,curLvl=-1;
+function updLevel(){const cnt=notes.length,i=lvlOf(cnt),l=LEVELS[i],z=$('#zeroBadge');
+  if(i!==curLvl){curLvl=i;z.style.setProperty('--zg',lvlGrad(l));z.style.setProperty('--zs',l.s);z.style.setProperty('--zglow',l.g||'transparent');
+    z.className='zero lvl'+(l.anim?' anim':'')+(l.shine?' shine':'')+(l.g?' glow':'');z.title='Odznak: '+l.name+' – klikni pre všetky odznaky'}
+  if(document.documentElement.classList.contains('need-login')||(me&&!syncedOnce))return;
+  let st=null;try{st=localStorage.getItem('nulovky-lvl')}catch(e){}
+  if(st===null){try{localStorage.setItem('nulovky-lvl',i)}catch(e){}return}
+  if(i>+st){try{localStorage.setItem('nulovky-lvl',i)}catch(e){}setTimeout(()=>celebrate(i),700)}}
+function openLevels(){const cnt=notes.length,i=lvlOf(cnt),next=LEVELS[i+1];
+  $('#lvlBody').innerHTML=`<div class="lvl-cur">${badgeHTML(i,96)}<div><span class="lvl-k">Tvoj odznak</span><h3>${esc(LEVELS[i].name)}</h3>
+    <p>${cnt} ${cnt===1?'bankovka':cnt>=2&&cnt<=4?'bankovky':'bankoviek'} v zbierke</p>
+    ${next?`<div class="lvl-bar"><i style="width:${Math.round((cnt-LEVELS[i].n)/(next.n-LEVELS[i].n)*100)}%"></i></div><small>Do ďalšieho odznaku chýba ${next.n-cnt} ${next.n-cnt===1?'bankovka':next.n-cnt<=4?'bankovky':'bankoviek'}</small>`:'<small>Máš všetky odznaky! 🏆</small>'.replace(' 🏆','')}</div></div>
+    <div class="lvl-grid">${LEVELS.map((l,k)=>{const got=cnt>=l.n;return `<div class="lvl-it ${got?'got':''}">${badgeHTML(k,64,!got)}<b>${got?esc(l.name):'???'}</b><small>${l.n?'od '+l.n+' bankoviek':'na začiatku'}</small></div>`}).join('')}</div>`;
+  $('#lvlDlg').showModal()}
+$('#zeroBadge').onclick=e=>{const z=e.currentTarget;z.classList.remove('tap');void z.offsetWidth;z.classList.add('tap');openLevels()};
+// gratulácia
+function confetti(colors){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=document.createElement('canvas');c.className='confetti';document.body.appendChild(c);if(c.showPopover){c.popover='manual';c.showPopover()}const x=c.getContext('2d');
+  const W=c.width=innerWidth*devicePixelRatio,H=c.height=innerHeight*devicePixelRatio;const P=[];
+  for(let k=0;k<150;k++)P.push({x:W/2+(Math.random()-.5)*W*.2,y:H*.42,vx:(Math.random()-.5)*W*.022,vy:-(Math.random()*H*.022+H*.006),r:(Math.random()*6+4)*devicePixelRatio,
+    a:Math.random()*6.28,va:(Math.random()-.5)*.3,col:colors[k%colors.length],sq:Math.random()<.5});
+  const t0=performance.now();(function f(t){const dt=t-t0;x.clearRect(0,0,W,H);
+    for(const p of P){p.vy+=H*.00045;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.globalAlpha=Math.max(0,1-dt/3200);x.fillStyle=p.col;
+      if(p.sq)x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);else{x.beginPath();x.arc(0,0,p.r/2.4,0,6.28);x.fill()}x.restore()}
+    if(dt<3300)requestAnimationFrame(f);else c.remove()})(t0)}
+function celebrate(i){const l=LEVELS[i];
+  $('#upBadge').innerHTML=badgeHTML(i,140);$('#upName').textContent=l.name;
+  $('#upTxt').textContent=`Tvoja zbierka má už ${l.n} bankoviek. Získal si nový odznak!`;
+  $('#upRays').style.setProperty('--gl',l.g||'#f07aa6');
+  const d=$('#upDlg');if(d.open)return;d.showModal();setTimeout(()=>confetti([...l.c,'#ffffff','#f07aa6']),250)}
+$('#upOk').onclick=()=>$('#upDlg').close();
 
 /* ================== štart ================== */
 (async()=>{db=await openDB();try{notes=(await store.all()).filter(n=>!n._deleted)}catch(e){db=null;notes=[]}
