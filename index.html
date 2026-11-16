@@ -200,6 +200,20 @@ html.need-login body>header,html.need-login body>main,html.need-login .fab{visib
 #syncBtn[data-s=err]{color:var(--no)}
 .mi.acc{cursor:default}.mi.acc:active{transform:none}
 
+/* nebezpečné akcie */
+.danger-zone{margin-top:18px;padding:14px;border:1.5px dashed var(--no);border-radius:16px;background:var(--nobg);display:flex;flex-direction:column;gap:8px}
+.danger-zone>span{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--no)}
+.danger-zone small{color:var(--no);opacity:.8;font-size:12px}
+.btn.dangerbtn{background:var(--no);color:#fff;justify-content:center;padding:13px;box-shadow:0 6px 16px -8px rgba(179,38,30,.8)}
+.btn.dangerbtn:hover{filter:brightness(.92)}
+html.danger-mode body::after{content:"";position:fixed;inset:0;z-index:150;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(220,30,40,.18),rgba(200,20,30,.55));animation:dangerIn .35s ease-out both}
+@keyframes dangerIn{from{opacity:0}}
+#askDlg.danger{border:2px solid var(--no)}
+#askDlg.danger #askTxt{color:var(--no);font-weight:600}
+#askDlg.danger #askYes{background:var(--no);box-shadow:none}
+#askDlg.danger::backdrop{background:rgba(120,10,15,.55)!important}
+
 /* OCR */
 .ocrbar{grid-column:span 6;display:none;align-items:center;gap:12px;background:var(--blush);border-radius:14px;padding:10px 12px;font-size:14px}
 .ocrbar.show{display:flex;animation:pop .3s}
@@ -520,9 +534,11 @@ dialog[autofocus]:focus{outline:none}
       <li id="fsLi" hidden><button class="mi" id="fsBtn"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path d="m9 10 2 2 4-4"/></svg></span><span>Automatická záloha do počítača<small id="fsInfo">vyber súbor, kam sa bude zbierka sama ukladať</small></span></button></li>
       <li id="fsOffLi" hidden><button class="mi" id="fsOff"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span><span>Vypnúť automatickú zálohu<small>súbor v počítači ostane</small></span></button></li>
       <li><button class="mi" id="importBtn"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0L8 8m4-4 4 4"/><path d="M4 17v3h16v-3"/></svg></span><span>Načítať zálohu<small>obnoví zbierku zo súboru</small></span></button></li>
-      <li><button class="mi red" id="wipeBtn"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span>Vymazať celú zbierku<small>zmizne na všetkých zariadeniach</small></span></button></li>
       <li><button class="mi" id="logoutBtn"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></span><span>Odhlásiť sa<small>z tohto zariadenia</small></span></button></li>
     </ul>
+    <div class="danger-zone"><span>Nebezpečná zóna</span>
+      <button class="btn dangerbtn" id="wipeBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>Vymazať celú zbierku</button>
+      <small>Zmizne na všetkých zariadeniach aj u otca. Nedá sa vrátiť.</small></div>
   </div>
 </dialog>
 
@@ -617,7 +633,7 @@ const esc=s=>(s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 const norm=s=>(s??'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
 const compact=s=>norm(s).replace(/[^a-z0-9]/g,'');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-function ask(t){return new Promise(r=>{$('#askTxt').textContent=t;const d=$('#askDlg');const done=v=>{d.close();r(v)};$('#askYes').onclick=()=>done(true);$('#askNo').onclick=()=>done(false);d.oncancel=()=>r(false);d.showModal()})}
+function ask(t,o={}){return new Promise(r=>{$('#askTxt').textContent=t;const d=$('#askDlg');d.classList.toggle('danger',!!o.danger);$('#askYes').textContent=o.yes||'Áno';$('#askNo').textContent=o.no||'Zrušiť';const done=v=>{d.close();setTimeout(()=>r(v),200)};$('#askYes').onclick=()=>done(true);$('#askNo').onclick=()=>done(false);d.oncancel=()=>r(false);d.showModal()})}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2400)}
 function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,i)=>i);
   for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
@@ -955,7 +971,10 @@ $('#importInput').onchange=async e=>{const f=e.target.files[0];e.target.value=''
   try{const data=JSON.parse(await f.text());const arr=Array.isArray(data)?data:data.notes;let c=0;
     for(const n of arr){if(!n?.id||!n.name||n._deleted)continue;delete n.rv;await saveNote(n,true);const i=notes.findIndex(x=>x.id===n.id);i>=0?notes[i]=n:notes.push(n);c++}
     render();menuDlg.close();toast(`Načítaných ${c} bankoviek`)}catch(err){toast('Súbor sa nedá načítať')}};
-$('#wipeBtn').onclick=async()=>{if(!await ask('Naozaj vymazať CELÚ zbierku? Zmizne na všetkých zariadeniach aj u otca. Toto sa nedá vrátiť – najprv si ulož zálohu.'))return;
+$('#wipeBtn').onclick=async()=>{const dz=document.documentElement;dz.classList.add('danger-mode');
+  const ok=await ask('Naozaj chceš vymazať CELÚ zbierku? Zmizne na všetkých zariadeniach aj u otca.',{danger:true,yes:'Pokračovať',no:'Nie, nechať'})
+    &&await ask(`Posledná otázka: vymazať všetkých ${notes.length} bankoviek natrvalo? Toto sa NEDÁ vrátiť.`,{danger:true,yes:'Áno, vymazať všetko',no:'Zrušiť'});
+  dz.classList.remove('danger-mode');if(!ok)return;
   for(const n of notes)await removeNote(n);menuDlg.close();document.querySelectorAll('#grid .card').forEach((c,i)=>{c.style.animationDelay=Math.min(i,12)*30+'ms';c.classList.add('removing')});await wait(500);notes=[];render();toast('Zbierka vymazaná')};
 
 /* ================== udalosti ================== */
