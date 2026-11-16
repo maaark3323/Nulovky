@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#7a0c22">
 <title>Nulovky – zbierka 0 € bankoviek</title>
+<script>try{if(!localStorage.getItem("nulovky-user"))document.documentElement.classList.add("need-login")}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -182,7 +183,8 @@ dialog.lb[open]{animation:none}
 /* prihlásenie + sync */
 #login{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px;
   background:linear-gradient(135deg,var(--n1),var(--n3));}
-#login.show{display:flex;animation:fadeIn .3s}
+#login.show,html.need-login #login{display:flex}
+html.need-login body>header,html.need-login body>main,html.need-login .fab{visibility:hidden}
 .lcard{width:min(380px,100%);background:var(--paper);border-radius:24px;padding:28px 24px;box-shadow:0 20px 50px -20px rgba(110,40,110,.5);display:flex;flex-direction:column;gap:12px;text-align:center;animation:dlgIn .45s cubic-bezier(.16,1,.3,1)}
 .lzero{font-size:96px;font-weight:900;line-height:.85;margin:0 auto;background:linear-gradient(160deg,var(--z1),var(--z2));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px var(--zs);padding:.06em .04em .14em}
 .lcard h2{margin:0;color:var(--ntitle);letter-spacing:.5px}
@@ -1034,8 +1036,8 @@ async function syncNow(){
     else setSync('err','Synchronizácia zlyhala – skúsim znova')}
   finally{syncing=false;if(syncAgain){syncAgain=false;queueSync(300)}}}
 // prihlásenie
-function showLogin(msg){const l=$('#login');l.classList.add('show');$('#loginErr').textContent=msg||'';setTimeout(()=>$('#lEmail').focus(),300)}
-function hideLogin(){$('#login').classList.remove('show')}
+function showLogin(msg){const l=$('#login');document.documentElement.classList.add('need-login');l.classList.add('show');$('#loginErr').textContent=msg||'';setTimeout(()=>$('#lEmail').focus(),300)}
+function hideLogin(){const l=$('#login');document.documentElement.classList.remove('need-login');if(l.classList.contains('show')){l.animate([{opacity:1},{opacity:0}],{duration:250}).onfinish=()=>l.classList.remove('show')}}
 $('#loginForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('#lBtn');$('#loginErr').textContent='';
   if(isOffline()){$('#loginErr').textContent='Na prihlásenie potrebuješ internet.';return}
   btn.disabled=true;btn.textContent='Prihlasujem…';
@@ -1061,7 +1063,7 @@ async function initCloud(){
   sb=supabase.createClient(SB_URL,SB_KEY);
   const {data:{session}}=await sb.auth.getSession();
   if(!session){showLogin();return}
-  me=session.user;updAccount();syncNow();
+  me=session.user;try{localStorage.setItem('nulovky-user',me.email)}catch(_){}hideLogin();updAccount();syncNow();
   sb.auth.onAuthStateChange((ev,s)=>{if(ev==='SIGNED_OUT'){me=null;showLogin()}else if(s)me=s.user});
 }
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
