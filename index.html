@@ -397,7 +397,7 @@ dialog::backdrop{background:rgba(50,6,28,.6)}
 .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--rose);box-shadow:0 0 0 3px var(--blush)}
 .fld textarea{min-height:70px;resize:vertical}
 .mono{font-family:ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:1px}
-.photos{display:grid;grid-template-columns:1fr 1fr;gap:12px;grid-column:span 6}
+.photos{display:grid;grid-template-columns:1fr;gap:12px;grid-column:span 6}
 .drop{aspect-ratio:2/1;border:2px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px;position:relative;overflow:hidden;background:var(--cream);cursor:pointer;transition:.15s}
 .drop:hover,.drop.over{border-color:var(--rose);background:var(--blush)}
 .drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -510,9 +510,6 @@ dialog[autofocus]:focus{outline:none}
   <div class="filters">
     <select class="chip-sel" id="fCountry"><option value="">Všetky štáty</option></select>
     <div class="yrg"><span class="flabel">Rok</span><input class="f-in" id="fFrom" type="text" inputmode="numeric" placeholder="od"><span class="flabel">–</span><input class="f-in" id="fTo" type="text" inputmode="numeric" placeholder="do"></div>
-    <select class="chip-sel" id="fCond">
-      <option value="">Akýkoľvek stav</option><option>Nová</option><option>Takmer nová</option><option>Mierne použitá</option><option>Použitá</option>
-    </select>
     <span class="spacer"></span>
     <select class="chip-sel" id="sort">
       <option value="added">Naposledy pridané</option>
@@ -542,22 +539,16 @@ dialog[autofocus]:focus{outline:none}
       <div class="form">
         <div class="photos">
           <div class="drop" id="dropFront"><span style="color:var(--rose)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Predná strana<br><small>klikni alebo pretiahni fotku</small></div>
-          <div class="drop" id="dropBack"><span style="color:var(--rose)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Zadná strana<br><small>nepovinné</small></div>
         </div>
         <div class="ocrbar" id="ocrBar"><span class="ocr-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 10h8M8 14h5"/></svg></span><div style="flex:1;min-width:0"><span id="ocrTxt">Čítam text z fotky…</span><div class="pbar"><i id="ocrP"></i></div></div><button type="button" class="btn ghost" id="ocrBtn">Prečítať z fotky</button></div>
         <div class="warn" id="dupWarn"></div>
         <div class="fld s6"><label>Názov / motív *</label><input name="name" required placeholder="napr. Bratislavský hrad"></div>
-        <div class="fld"><label>Štát</label><input name="country" list="countryList" placeholder="napr. Slovensko"></div>
-        <div class="fld"><label>Mesto / miesto</label><input name="place" list="placeList" placeholder="napr. Bratislava"></div>
+        <div class="fld s2"><label>Štát</label><input name="country" list="countryList" placeholder="napr. Slovensko"></div>
+        <div class="fld s2"><label>Rok vydania</label><input name="year" type="text" inputmode="numeric" min="2015" max="2100" placeholder="2023"></div>
+        <div class="fld s2"><label>Počet kusov</label><input name="qty" type="text" inputmode="numeric" min="1" value="1"></div>
         <div class="fld s2"><label>Kód série</label><input name="code" class="mono" maxlength="6" placeholder="PEAA"></div>
         <div class="fld s2"><label>Sériové číslo</label><input name="number" class="mono" placeholder="001234"></div>
         <div class="fld s2"><label>Edícia</label><input name="edition" placeholder="2023-1"></div>
-        <div class="fld s2"><label>Rok vydania</label><input name="year" type="text" inputmode="numeric" min="2015" max="2100" placeholder="2023"></div>
-        <div class="fld s2"><label>Stav bankovky</label><select name="cond"><option value="">Neuvedené</option><option>Nová</option><option>Takmer nová</option><option>Mierne použitá</option><option>Použitá</option></select></div>
-        <div class="fld s2"><label>Počet kusov</label><input name="qty" type="text" inputmode="numeric" min="1" value="1"></div>
-        <div class="fld"><label>Cena (€)</label><input name="price" type="text" inputmode="decimal" placeholder="0.00"></div>
-        <div class="fld"><label>Kde kúpená</label><input name="source" placeholder="automat, burza, e-shop…"></div>
-        <div class="fld s6"><label>Značky (oddelené čiarkou)</label><input name="tags" placeholder="výročie, limitka, podpísaná…"></div>
         <div class="fld s6"><label>Poznámka</label><textarea name="notes"></textarea></div>
       </div>
     </div>
@@ -739,7 +730,7 @@ function matchesQuery(n,q){
   if(cq.length>=3&&(compact((n.code||'')+(n.number||'')).includes(cq)||compact(n.number).includes(cq)))return true;
   const h=hay(n);return nq.split(/\s+/).every(t=>h.includes(t))}
 function filtered(){
-  const q=$('#q').value.trim(),c=$('#fCountry').value||countryChip,f=+$('#fFrom').value||0,t=+$('#fTo').value||9999,cond=$('#fCond').value;
+  const q=$('#q').value.trim(),c=$('#fCountry').value||countryChip,f=+$('#fFrom').value||0,t=+$('#fTo').value||9999,cond='';
   let r=notes.filter(n=>matchesQuery(n,q)&&(!c||n.country===c)&&(!n.year?(!f&&t===9999):(n.year>=f&&n.year<=t))&&(!cond||n.cond===cond));
   const s=$('#sort').value,cmp=(a,b)=>(a||'').localeCompare(b||'','sk');
   r.sort({added:(a,b)=>b.added-a.added,yearDesc:(a,b)=>(b.year||0)-(a.year||0),yearAsc:(a,b)=>(a.year||9999)-(b.year||9999),
@@ -791,14 +782,14 @@ function render(){
 let editing=null, tmp={front:null,back:null,sig:null};
 const form=$('#editForm');
 function setDrop(el,src,label,sub){el.innerHTML=src?`<img src="${src}"><button type="button" class="rm" title="Odstrániť">${IC.x}</button>`:`<span style="color:var(--rose)">${IC.cam}</span>${label}<br><small>${sub}</small>`}
-function refreshDrops(){setDrop($('#dropFront'),tmp.front,'Predná strana','klikni alebo pretiahni fotku');setDrop($('#dropBack'),tmp.back,'Zadná strana','nepovinné')}
+function refreshDrops(){setDrop($('#dropFront'),tmp.front,'Fotka bankovky','klikni alebo pretiahni fotku')}
 function openEdit(n=null,origin){
   editing=n;form.reset();$('#dupWarn').className='warn';
   $('#editTitle').textContent=n?'Upraviť bankovku':'Nová bankovka';
   tmp={front:n?.front||null,back:n?.back||null,sig:n?.sig||null};
   if(n)for(const k of['name','country','place','code','number','edition','year','cond','qty','price','source','tags','notes'])if(form.elements[k])form.elements[k].value=n[k]??'';
   if(!n){const q=$('#q').value.trim();if(q&&!notes.some(x=>matchesQuery(x,q))){if(/^[a-z]{4}\b/i.test(q)&&q.length<=12)form.elements.code.value=q.slice(0,4).toUpperCase();else form.elements.name.value=q}}
-  form.elements.cond._sync();refreshDrops();ocrRun++;ocrIdle();form.querySelectorAll('.autofill').forEach(e=>e.classList.remove('autofill'));origin?showFrom(editDlg,origin):editDlg.showModal()}
+  refreshDrops();ocrRun++;ocrIdle();form.querySelectorAll('.autofill').forEach(e=>e.classList.remove('autofill'));origin?showFrom(editDlg,origin):editDlg.showModal()}
 function bindDrop(el,key){
   const pick=async()=>{const f=await choosePhoto(key==='front'?'Fotka prednej strany':'Fotka zadnej strany');f&&setPhoto(f,key)};
   el.addEventListener('click',e=>{if(e.target.closest('.rm')){tmp[key]=null;if(key==='front'){tmp.sig=null;ocrRun++;ocrIdle()}refreshDrops();return}pick()});
@@ -822,12 +813,12 @@ async function runOCR(auto){if(!tmp.front)return;if(auto&&isOffline()){ocrIdle()
   catch(e){console.error(e);if(id!==ocrRun)return;b.classList.remove('busy');$('#ocrTxt').textContent=isOffline()||e.message==='net'?'Čítanie textu z fotky funguje len s internetom. Ostatné ide aj bez neho.':'Text sa nepodarilo prečítať. Skús to znova.'}}
 $('#ocrBtn').onclick=()=>runOCR(false);
 
-bindDrop($('#dropFront'),'front');bindDrop($('#dropBack'),'back');
+bindDrop($('#dropFront'),'front');
 
 function readForm(){const f=form.elements,o={};
-  for(const k of['name','country','place','code','number','edition','cond','source','tags','notes'])o[k]=f[k].value.trim();
+  for(const k of['name','country','code','number','edition','notes'])o[k]=f[k].value.trim();
   o.code=o.code.toUpperCase();o.number=o.number.toUpperCase();
-  o.year=f.year.value?+f.year.value:null;o.qty=Math.max(1,+f.qty.value||1);o.price=f.price.value?+f.price.value.replace(',','.')||null:null;return o}
+  o.year=f.year.value?+f.year.value:null;o.qty=Math.max(1,+f.qty.value||1);return o}
 function findDups(o){return notes.filter(n=>n.id!==editing?.id&&(
   (o.code&&o.number&&n.code===o.code&&n.number===o.number)||
   (o.code&&n.code===o.code&&norm(n.edition)===norm(o.edition)&&(o.edition||!o.number))||
@@ -1046,7 +1037,7 @@ $('#wipeBtn').onclick=async()=>{const dz=document.documentElement;dz.classList.a
 /* ================== udalosti ================== */
 $('#addBtn').onclick=$('#fab').onclick=e=>{const b=e.currentTarget;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');openEdit(null,b)};
 ['q','fFrom','fTo'].forEach(id=>$('#'+id).addEventListener('input',render));
-['fCountry','fCond','sort'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='fCountry')countryChip='';render()}));
+['fCountry','sort'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='fCountry')countryChip='';render()}));
 $('#countryChips').onclick=e=>{const b=e.target.closest('.cchip');if(!b)return;countryChip=countryChip===b.dataset.c?'':b.dataset.c;$('#fCountry').value='';render()};
 $('#grid').onclick=e=>{const c=e.target.closest('.card');c&&openDetail(c.dataset.id,c)};
 $('#verdict').onclick=e=>{const a=e.target.closest('[data-open]');if(a){e.preventDefault();openDetail(a.dataset.open,document.querySelector(`#grid .card[data-id="${a.dataset.open}"]`)||a)}};
@@ -1066,8 +1057,8 @@ function enhance(sel){
     m.innerHTML=[...sel.options].map((o,i)=>`<button type="button" class="${i===sel.selectedIndex?'on':''}" data-i="${i}">${esc(o.text)}</button>`).join('');w.classList.add('open')};
   m.onclick=e=>{e.preventDefault();e.stopPropagation();const o=e.target.closest('[data-i]');if(!o)return;sel.selectedIndex=+o.dataset.i;sel._sync();closeCS();sel.dispatchEvent(new Event('change'))};
   sel._sync()}
-['#fCountry','#fCond','#sort'].forEach(id=>enhance($(id)));enhance(form.elements.cond);
-const syncAll=()=>['#fCountry','#fCond','#sort'].forEach(id=>$(id)._sync());
+['#fCountry','#sort'].forEach(id=>enhance($(id)));
+const syncAll=()=>['#fCountry','#sort'].forEach(id=>$(id)._sync());
 
 /* ================== tmavý režim ================== */
 function applyTheme(t){document.documentElement.dataset.theme=t;$('#themeBtn').innerHTML=t==='dark'?IC.sun:IC.moon;
