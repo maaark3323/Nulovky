@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#7a0c22">
+<meta name="theme-color" content="#f8dce8">
+<meta name="color-scheme" content="light dark">
 <title>Nulovky – zbierka 0 € bankoviek</title>
-<script>try{if(!localStorage.getItem("nulovky-user"))document.documentElement.classList.add("need-login")}catch(e){}</script>
+<script>try{if(!localStorage.getItem("nulovky-user"))document.documentElement.classList.add("need-login")}catch(e){}
+try{var t=localStorage.getItem("nulovky-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),h=document.documentElement;h.dataset.theme=t;h.style.colorScheme=t;h.style.backgroundColor=t==="dark"?"#170b12":"#fff5f9";document.querySelector("meta[name=theme-color]").content=t==="dark"?"#2a1020":"#f8dce8"}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1071,7 +1073,7 @@ function enhance(sel){
 const syncAll=()=>['#fCountry','#sort'].forEach(id=>$(id)._sync());
 
 /* ================== tmavý režim ================== */
-function applyTheme(t){document.documentElement.dataset.theme=t;$('#themeBtn').innerHTML=t==='dark'?IC.sun:IC.moon;
+function applyTheme(t){const h=document.documentElement;h.dataset.theme=t;h.style.colorScheme=t;h.style.backgroundColor=t==='dark'?'#170b12':'#fff5f9';$('#themeBtn').innerHTML=t==='dark'?IC.sun:IC.moon;
   document.querySelector('meta[name=theme-color]').content=t==='dark'?'#2a1020':'#f8dce8'}
 let theme=null;try{theme=localStorage.getItem('nulovky-theme')}catch(e){}
 applyTheme(theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
