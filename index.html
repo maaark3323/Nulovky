@@ -110,8 +110,6 @@ main{max-width:1200px;margin:14px auto 0;padding:0 clamp(12px,3vw,40px) 60px;pos
 .qph i{font-style:normal}
 .qph .dup{display:none;padding-left:48px}
 .qph.run .dup{display:inline}
-.qph.run>span{animation:qMarq var(--qd,10s) linear infinite}
-@keyframes qMarq{from{transform:translateX(var(--qx))}to{transform:translateX(0)}}
 .qwrap.has .qph{display:none}
 @media (max-width:640px){.qph{font-size:16px}}
 .iconbtn{flex:none;width:52px;height:52px;border-radius:14px;border:0;display:grid;place-items:center;background:var(--blush);color:var(--crimson);transition:.15s}
@@ -523,7 +521,6 @@ dialog[autofocus]:focus{outline:none}
   <div class="filters">
     <select class="chip-sel" id="fCountry"><option value="">Všetky štáty</option></select>
     <div class="yrg"><span class="flabel">Rok</span><input class="f-in" id="fFrom" type="text" inputmode="numeric" placeholder="od"><span class="flabel">–</span><input class="f-in" id="fTo" type="text" inputmode="numeric" placeholder="do"></div>
-    <span class="spacer"></span>
     <select class="chip-sel" id="sort">
       <option value="added">Naposledy pridané</option>
       <option value="yearDesc">Rok: najnovšie</option>
@@ -532,7 +529,7 @@ dialog[autofocus]:focus{outline:none}
       <option value="country">Štát</option>
       <option value="code">Kód série</option>
     </select>
-    <div class="seg"><button id="vGrid" class="on" title="Mriežka"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button><button id="vList" title="Zoznam"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></button></div>
+    <div class="seg" style="margin-left:auto"><button id="vGrid" class="on" title="Mriežka"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button><button id="vList" title="Zoznam"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></button></div>
   </div>
   <div class="countries" id="countryChips"></div>
   <div class="count" id="count"></div>
@@ -1275,11 +1272,16 @@ function celebrate(i){const l=LEVELS[i];
 $('#upOk').onclick=()=>$('#upDlg').close();
 
 /* ================== pohyblivý text vo vyhľadávaní ================== */
-(()=>{const q=$('#q'),ph=$('#qph'),t=ph.firstElementChild;
-  const fit=()=>{ph.classList.remove('run');const w=t.firstElementChild.offsetWidth,over=w-ph.clientWidth;ph.classList.toggle('run',over>4);ph.classList.toggle('fit',over<=4);
-    const step=w+48;ph.style.setProperty('--qx',-step+'px');ph.style.setProperty('--qd',(step/45)+'s')};
+(()=>{const q=$('#q'),ph=$('#qph'),t=ph.firstElementChild;let an=null,lastW=0;
+  const fit=()=>{const w=t.firstElementChild.offsetWidth,box=ph.clientWidth;if(!w||!box)return;
+    const run=w-box>4;ph.classList.toggle('run',run);ph.classList.toggle('fit',!run);
+    if(!run){an?.cancel();an=null;lastW=0;return}
+    const step=w+48;if(an&&step===lastW)return;lastW=step;an?.cancel();
+    an=t.animate([{transform:`translateX(${-step}px)`},{transform:'translateX(0)'}],{duration:step/45*1000,iterations:Infinity,easing:'linear'})};
   const upd=()=>q.parentElement.classList.toggle('has',!!q.value);
-  q.addEventListener('input',upd);addEventListener('resize',fit);(document.fonts?.ready||Promise.resolve()).then(fit);fit();upd()})();
+  q.addEventListener('input',upd);
+  if(window.ResizeObserver)new ResizeObserver(fit).observe(ph);else addEventListener('resize',fit);
+  (document.fonts?.ready||Promise.resolve()).then(fit);setTimeout(fit,500);fit();upd()})();
 
 /* ================== štart ================== */
 (async()=>{db=await openDB();try{notes=(await store.all()).filter(n=>!n._deleted)}catch(e){db=null;notes=[]}
