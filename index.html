@@ -107,8 +107,11 @@ main{max-width:1200px;margin:14px auto 0;padding:0 clamp(12px,3vw,40px) 60px;pos
   -webkit-mask:linear-gradient(90deg,#000 88%,transparent);mask:linear-gradient(90deg,#000 88%,transparent)}
 .qph.fit{-webkit-mask:none;mask:none}
 .qph>span{display:inline-block;will-change:transform}
-.qph.run>span{animation:qMarq var(--qd,8s) ease-in-out infinite}
-@keyframes qMarq{0%,18%{transform:translateX(0)}50%,68%{transform:translateX(var(--qx))}100%{transform:translateX(0)}}
+.qph i{font-style:normal}
+.qph .dup{display:none;padding-left:48px}
+.qph.run .dup{display:inline}
+.qph.run>span{animation:qMarq var(--qd,10s) linear infinite}
+@keyframes qMarq{from{transform:translateX(var(--qx))}to{transform:translateX(0)}}
 .qwrap.has .qph{display:none}
 @media (max-width:640px){.qph{font-size:16px}}
 .iconbtn{flex:none;width:52px;height:52px;border-radius:14px;border:0;display:grid;place-items:center;background:var(--blush);color:var(--crimson);transition:.15s}
@@ -507,7 +510,7 @@ dialog[autofocus]:focus{outline:none}
     <div class="sbar">
       <div class="sfield">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <div class="qwrap"><input id="q" type="search" aria-label="Mám ju? Hľadaj podľa názvu, kódu série alebo sériového čísla" autocomplete="off"><span class="qph" id="qph" aria-hidden="true"><span>Mám ju? Napíš názov, kód série (PEAA) alebo sériové číslo</span></span></div>
+        <div class="qwrap"><input id="q" type="search" aria-label="Mám ju? Hľadaj podľa názvu, kódu série alebo sériového čísla" autocomplete="off"><span class="qph" id="qph" aria-hidden="true"><span><i>Mám ju? Napíš názov, kód série (PEAA) alebo sériové číslo</i><i class="dup">Mám ju? Napíš názov, kód série (PEAA) alebo sériové číslo</i></span></span></div>
       </div>
       <button class="iconbtn" id="photoSearchBtn" title="Hľadať podľa fotky">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
@@ -1273,8 +1276,8 @@ $('#upOk').onclick=()=>$('#upDlg').close();
 
 /* ================== pohyblivý text vo vyhľadávaní ================== */
 (()=>{const q=$('#q'),ph=$('#qph'),t=ph.firstElementChild;
-  const fit=()=>{const over=t.scrollWidth-ph.clientWidth;ph.classList.toggle('run',over>4);ph.classList.toggle('fit',over<=4);
-    ph.style.setProperty('--qx',-(over+12)+'px');ph.style.setProperty('--qd',Math.max(6,over/22+5)+'s')};
+  const fit=()=>{ph.classList.remove('run');const w=t.firstElementChild.offsetWidth,over=w-ph.clientWidth;ph.classList.toggle('run',over>4);ph.classList.toggle('fit',over<=4);
+    const step=w+48;ph.style.setProperty('--qx',-step+'px');ph.style.setProperty('--qd',(step/45)+'s')};
   const upd=()=>q.parentElement.classList.toggle('has',!!q.value);
   q.addEventListener('input',upd);addEventListener('resize',fit);(document.fonts?.ready||Promise.resolve()).then(fit);fit();upd()})();
 
