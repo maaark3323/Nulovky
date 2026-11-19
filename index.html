@@ -1279,7 +1279,7 @@ $('#upOk').onclick=()=>$('#upDlg').close();
     const run=w-box>4;ph.classList.toggle('run',run);ph.classList.toggle('fit',!run);
     if(!run){an?.cancel();an=null;lastW=0;return}
     const step=w+48;if(an&&step===lastW)return;lastW=step;an?.cancel();
-    an=t.animate([{transform:`translateX(${-step}px)`},{transform:'translateX(0)'}],{duration:step/45*1000,iterations:Infinity,easing:'linear'})};
+    an=t.animate([{transform:'translateX(0)'},{transform:`translateX(${-step}px)`}],{duration:step/45*1000,iterations:Infinity,easing:'linear'})};
   const upd=()=>q.parentElement.classList.toggle('has',!!q.value);
   q.addEventListener('input',upd);
   if(window.ResizeObserver)new ResizeObserver(fit).observe(ph);else addEventListener('resize',fit);
