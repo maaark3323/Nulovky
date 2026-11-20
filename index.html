@@ -289,6 +289,9 @@ dialog.up[open] h2{animation-delay:.55s}dialog.up[open] p{animation-delay:.7s}di
 .up-in .btn{position:relative;justify-content:center;min-width:140px}
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;pointer-events:none;z-index:2147483647}
 
+.verdict.maybe{background:#fff4d6;color:#8a5a00}.verdict.maybe .dot{background:#e0a100}
+[data-theme=dark] .verdict.maybe{background:#3a2e0e;color:#f3d98a}
+#pOcr .btn{flex:none}
 /* OCR */
 .ocrbar{grid-column:span 6;display:none;align-items:center;gap:12px;background:var(--blush);border-radius:14px;padding:10px 12px;font-size:14px}
 .ocrbar.show{display:flex;animation:pop .3s}
@@ -903,37 +906,43 @@ $('#dDup').onclick=async()=>{const n=notes.find(x=>x.id===detailId);n.qty=(+n.qt
 /* ================== hľadanie podľa fotky ================== */
 $('#photoSearchBtn').onclick=async()=>{const f=await choosePhoto('Hľadať podľa fotky');if(!f)return;
   const src=await fileToData(f,1400),sig=await signature(src);
-  const withSig=notes.filter(n=>n.sig);
-  const res=withSig.map(n=>({n,s:simil(sig,n.sig)})).sort((a,b)=>b.s-a.s).slice(0,6);
-  const best=res[0]?.s||0;
-  let cls,txt,sub;
-  if(!withSig.length){cls='no';txt='Zatiaľ nemáš žiadne bankovky s fotkou';sub='Porovnávať sa dá iba s bankovkami, ku ktorým je nahraná predná fotka.'}
-  else if(best>=.86){cls='yes';txt='Pravdepodobne ju už máš';sub='Najpodobnejšia: '+res[0].n.name}
-  else if(best>=.74){cls='yes';txt='Možno ju máš – skontroluj podobné';sub='Over to podľa kódu alebo názvu.'}
-  else{cls='no';txt='Zhodu som nenašiel';sub='Vyzerá to tak, že túto ešte nemáš.'}
-  $('#pBody').innerHTML=`<img class="qimg" src="${src}">
-    <div class="verdict show ${cls}" id="pVerdict"><div class="dot">${cls==='yes'?IC.check:IC.x}</div><div>${txt}<small>${esc(sub)}</small></div></div>
-    <div class="ocrbar show busy" id="pOcr" style="margin-top:10px"><span class="ocr-ic">${IC.scan}</span><div style="flex:1;min-width:0"><span id="pOcrTxt">Čítam text z fotky…</span><div class="pbar ind"><i></i></div></div></div>
-    ${res.length?`<h3 style="margin:18px 0 0">Najpodobnejšie v zbierke</h3><div class="matches">${res.map(({n,s})=>`<article class="card" data-id="${n.id}"><div class="thumb"><img decoding="async" src="${n.thumb||n.front}"><span class="pct">${Math.round(s*100)} %</span></div><div class="body"><h3>${esc(n.name)}</h3><p>${esc([n.code,n.year].filter(Boolean).join(' · '))}</p></div></article>`).join('')}</div>`:''}
-    <p style="color:var(--muted);font-size:13px;margin-top:14px">Tip: fotku sprav zhora, celú bankovku, pri dobrom svetle. Najistejšie je overiť to kódom série.</p>`;
-  photoDlg.showModal();
-  // čítanie textu – presnejšie overenie podľa sériového čísla / názvu
-  let r={},ocrErr=null;try{r=await readNote(src)}catch(e){ocrErr=e}
-  if(!photoDlg.open)return;
-  const bar=$('#pOcr');bar.classList.remove('busy');
-  const byCode=r.code&&r.number?notes.filter(n=>n.code===r.code&&compact(n.number)===compact(r.number)):[];
-  const rn=norm(r.name||'');
-  const byName=!byCode.length&&rn.length>5?notes.filter(n=>{const nn=norm(n.name);return nn&&(nn===rn||(nn.length>5&&(nn.includes(rn)||rn.includes(nn)))||lev(nn,rn)/Math.max(nn.length,rn.length)<.2)}):[];
-  const found=byCode.length?byCode:byName;
-  const read=[r.name,r.code&&(r.code+' '+(r.number||''))].filter(Boolean).join(' · ');
-  if(found.length){const v=$('#pVerdict');v.className='verdict show yes';v.querySelector('.dot').innerHTML=IC.check;
-    v.querySelector('div:last-child').innerHTML=`Áno, túto už máš – ${esc(found[0].name)}<small>${byCode.length?'Zhoduje sa sériové číslo':'Zhoduje sa názov'} (${esc(read)})${+found[0].qty>1?' · máš '+found[0].qty+' ks':''}</small>`;
-    $('#pOcrTxt').innerHTML=`<a href="#" data-open="${found[0].id}" style="color:inherit;font-weight:600">Otvoriť bankovku v zbierke</a>`}
-  else{$('#pOcrTxt').innerHTML=(read?`Prečítal som: <b>${esc(read)}</b> – v zbierke takú nemáš.`:ocrErr?'Bez internetu sa text nedá prečítať – porovnal som len podobnosť fotky.':'Text na fotke sa nepodarilo prečítať.')+
-    ` <button class="btn ghost" id="pAdd" style="margin-left:6px;padding:6px 10px">${IC.plus} Pridať do zbierky</button>`;
-    $('#pAdd').onclick=()=>{photoDlg.close();openEdit();tmp.front=src;tmp.sig=sig;refreshDrops();ocrIdle();
-      const names=['name','country','code','number','edition','year'];for(const k of names)if(r[k]!=null&&r[k]!==''){const el=form.elements[k];el.value=r[k];el.classList.add('autofill')}
-      $('#ocrTxt').textContent=read?'Údaje som doplnil z fotky. Skontroluj, či sedia.':'Doplň údaje alebo skús „Prečítať z fotky“.';liveDupCheck()}}};
+  // podobnosť fotky prepočítaná na 0–100 % (úplne iná nulovka ≈ 0 %, tá istá ≈ 100 %)
+  const imgS=n=>n.sig?Math.max(0,Math.min(1,(simil(sig,n.sig)-.55)/.38)):null;
+  const nameSim=(a,b)=>{a=norm(a);b=norm(b);if(!a||!b)return 0;if(a===b)return 1;
+    if(Math.min(a.length,b.length)>5&&(a.includes(b)||b.includes(a)))return .95;
+    const wa=new Set(a.split(/\s+/).filter(w=>w.length>2)),wb=new Set(b.split(/\s+/).filter(w=>w.length>2));
+    const inter=[...wa].filter(w=>wb.has(w)).length,jac=inter/Math.max(1,new Set([...wa,...wb]).size);
+    return Math.max(jac,1-lev(a,b)/Math.max(a.length,b.length))};
+  function score(n,r){const parts=[],why=[];const im=imgS(n);if(im!=null){parts.push([im,.45]);why.push('fotka '+Math.round(im*100)+' %')}
+    if(r){if(r.code&&r.number&&n.code===r.code&&compact(n.number)===compact(r.number))return {s:1,why:['sériové číslo sedí'],serial:true};
+      if(r.name&&n.name){const ns=nameSim(r.name,n.name);parts.push([ns,.35]);if(ns>.75)why.push('názov sedí')}
+      if(r.code&&n.code){const ok=n.code===r.code;parts.push([ok?1:0,.1]);if(ok)why.push('kód sedí')}
+      if(r.edition&&n.edition){const ok=norm(n.edition).replace(/\s/g,'')===norm(r.edition).replace(/\s/g,'');parts.push([ok?1:0,.05]);if(ok)why.push('edícia sedí')}
+      else if(r.year&&n.year){const ok=+n.year===+r.year;parts.push([ok?1:0,.05]);if(ok)why.push('rok sedí')}
+      if(r.country&&n.country){const ok=norm(n.country)===norm(r.country);parts.push([ok?1:0,.05]);if(ok)why.push('štát sedí')}}
+    if(!parts.length)return {s:0,why};const w=parts.reduce((a,p)=>a+p[1],0);return {s:parts.reduce((a,p)=>a+p[0]*p[1],0)/w,why}}
+  function show(r,ocrState){
+    const res=notes.map(n=>({n,...score(n,r)})).filter(x=>x.s>0||x.serial).sort((a,b)=>b.s-a.s).slice(0,6);
+    const best=res[0];let cls,txt,sub;
+    if(!notes.length){cls='no';txt='Zbierka je zatiaľ prázdna';sub='Nie je s čím porovnávať.'}
+    else if(!best||(!r&&!notes.some(n=>n.sig))){cls='no';txt=r?'Zhodu som nenašiel':'Zatiaľ nemáš bankovky s fotkou';sub=r?'Vyzerá to tak, že túto ešte nemáš.':'Čakám na prečítanie textu z fotky…'}
+    else if(best.s>=.85){cls='yes';txt='Áno, túto už máš';sub=best.n.name+' · '+best.why.join(', ')+(+best.n.qty>1?' · máš '+best.n.qty+' ks':'')}
+    else if(best.s>=.62){cls='maybe';txt='Možno ju máš – skontroluj';sub='Najpodobnejšia: '+best.n.name+(best.why.length?' ('+best.why.join(', ')+')':'')}
+    else{cls='no';txt='Zhodu som nenašiel';sub='Vyzerá to tak, že túto ešte nemáš.'}
+    const read=r?[r.name,r.code&&(r.code+' '+(r.number||'')),r.edition,r.country].filter(Boolean).join(' · '):'';
+    $('#pBody').innerHTML=`<img class="qimg" src="${src}">
+      <div class="verdict show ${cls==='maybe'?'yes maybe':cls}" id="pVerdict"><div class="dot">${cls==='no'?IC.x:IC.check}</div><div>${esc(txt)}<small>${esc(sub)}</small></div></div>
+      <div class="ocrbar show ${ocrState==='busy'?'busy':''}" id="pOcr" style="margin-top:10px"><span class="ocr-ic">${IC.scan}</span><div style="flex:1;min-width:0"><span id="pOcrTxt">${
+        ocrState==='busy'?'Čítam údaje z fotky, výsledok ešte spresním…':ocrState==='err'?'Bez internetu sa údaje z fotky nedajú prečítať – porovnal som len fotku.':read?`Prečítané z fotky: <b>${esc(read)}</b>`:'Text na fotke sa nepodarilo prečítať – porovnal som len fotku.'}</span><div class="pbar ind"><i></i></div></div>
+        ${ocrState!=='busy'&&cls!=='yes'?`<button class="btn ghost" id="pAdd" style="padding:6px 10px">${IC.plus} Pridať</button>`:''}</div>
+      ${res.length?`<h3 style="margin:18px 0 0">Najpodobnejšie v zbierke</h3><div class="matches">${res.map(({n,s,why})=>`<article class="card" data-id="${n.id}"><div class="thumb">${n.front?`<img decoding="async" src="${n.thumb||n.front}">`:ph(n)}<span class="pct">${Math.round(s*100)} %</span></div><div class="body"><h3>${esc(n.name)}</h3><p>${esc(why.join(' · ')||[n.code,n.year].filter(Boolean).join(' · '))}</p></div></article>`).join('')}</div>`:''}
+      <p style="color:var(--muted);font-size:13px;margin-top:14px">Percentá spájajú podobnosť fotky s údajmi prečítanými z bankovky (názov, kód, edícia, štát). Zhodné sériové číslo = 100 %.</p>`;
+    const add=$('#pAdd');if(add)add.onclick=()=>{photoDlg.close();openEdit();tmp.front=src;tmp.sig=sig;refreshDrops();ocrIdle();
+      if(r)for(const k of ['name','country','code','number','edition','year'])if(r[k]!=null&&r[k]!==''){const el=form.elements[k];el.value=r[k];el.classList.add('autofill')}
+      $('#ocrTxt').textContent=read?'Údaje som doplnil z fotky. Skontroluj, či sedia.':'Doplň údaje alebo skús „Prečítať z fotky“.';liveDupCheck()}}
+  show(null,'busy');photoDlg.showModal();
+  let r=null,err=false;try{r=await readNote(src)}catch(e){err=true}
+  if(!photoDlg.open)return;show(r||{},err?'err':'done')};
 $('#pBody').addEventListener('click',e=>{const a=e.target.closest('[data-open]');if(a){e.preventDefault();openDetail(a.dataset.open,a)}});
 $('#pBody').addEventListener('click',e=>{const c=e.target.closest('.card');if(c)openDetail(c.dataset.id,c)});
 
